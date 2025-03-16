@@ -1,10 +1,13 @@
+import enum
 from contextlib import asynccontextmanager
 from typing import Callable, Awaitable, Any
 
+
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from backend import config
+import config
 from logger import logger
+
 
 try:
     engine = create_async_engine(url=config.get_db_url())
@@ -34,3 +37,4 @@ def connection(method: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable
                 await session.close()
 
     return wrapper
+

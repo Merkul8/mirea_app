@@ -15,4 +15,7 @@ DB_NAME=os.getenv("DB_NAME")
 
 
 def get_db_url():
-    return (f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    return f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+def get_auth_data():
+    return {"secret_key": os.getenv("SECRET_KEY"), "algorithm": os.getenv("ALGORITHM")}

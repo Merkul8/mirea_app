@@ -4,10 +4,13 @@ from logger import logger
 from contextlib import asynccontextmanager
 from routing.routs import main_router
 import config
+from app.auth.auth import create_access_token
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
+
 
     logger.info("Сервер запущен")
     yield
