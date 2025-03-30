@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 
-from database.models import UserRole
+from app.auth.models import UserRole
 
 
 class UserRegister(BaseModel):
@@ -11,3 +11,8 @@ class UserRegister(BaseModel):
     patronymic: str = Field(..., min_length=3, max_length=50, description="Отчество, от 3 до 50 символов")
     role: UserRole = Field(..., description="Роль")
     departament_id: int = Field(..., description="ID кафедры")
+
+
+class UserLogin(BaseModel):
+    email: EmailStr = Field(..., description="Электронная почта")
+    password: str = Field(..., min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков")
