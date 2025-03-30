@@ -4,9 +4,14 @@ from typing import Callable, Awaitable, Any
 
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 
 import config
 from logger import logger
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 try:
