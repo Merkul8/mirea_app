@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
+from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie
 
-from app.auth.auth import get_password_hash, authenticate_user, create_access_token
+from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
+    refresh_access_token
 from app.auth.dao import UserDAO
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
@@ -29,8 +30,21 @@ async def login_user(response: Response, user_data: UserLogin) -> dict:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Неверная почта или пароль')
     access_token = create_access_token({"sub": str(check.id)})
-    response.set_cookie(key="users_access_token", value=access_token, httponly=True)
-    return {'access_token': access_token, 'refresh_token': None}
+    refresh_token = create_refresh_token({"sub": str(check.id)})
+    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    return {'access_token': access_token, 'refresh_token': refresh_token}
+
+
+@auth_router.post("/refresh/")
+async def refresh_user(response: Response, refresh_token: str = Cookie(None)) -> dict:
+    new_access_token = await refresh_access_token(refresh_token)
+    if new_access_token is not None:
+        response.set_cookie(key="access_token", value=new_access_token, httponly=True)
+        return {'access_token': new_access_token}
+    else:
+        return {"status": 500, "message": "Ошибка генерации нового refresh токена"}
+
 
 
 @auth_router.post("/logout/")

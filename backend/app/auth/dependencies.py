@@ -6,7 +6,7 @@ from config import get_auth_data
 
 
 def get_token(request: Request):
-    token = request.cookies.get('users_access_token')
+    token = request.cookies.get('access_token')
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token not found')
     return token

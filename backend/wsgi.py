@@ -23,7 +23,6 @@ if __name__ == "__main__":
     if config.MODE == "DEV":
         app_host = config.LOCAL_HOST
         app_port = config.LOCAL_PORT
-        print(f"HOTFIX: app_host = '{app_host}', app_port = {app_port}")
     else:
         raise ValueError("Хост/Порт не определен")
 

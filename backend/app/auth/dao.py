@@ -27,8 +27,8 @@ class UserDAO:
 
     @classmethod
     @connection
-    async def find_one_or_none_by_id(cls, user_id, session: AsyncSession) -> User:
-        query = select(User).where(User.id == user_id)
+    async def find_one_or_none_by_id(cls, user_id: int, session: AsyncSession) -> User:
+        query = select(User).where(User.id == int(user_id))
         user = await session.execute(query)
         return user.scalar_one_or_none()
 
