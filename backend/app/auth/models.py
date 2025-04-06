@@ -13,7 +13,7 @@ class EmployeeMetrics(Base):
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     publication_count: Mapped[int] = Column(Integer)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    user_id = Column(Integer, ForeignKey("user_mirea.id"))
 
 
 class UserRole(enum.Enum):
@@ -25,7 +25,7 @@ class UserRole(enum.Enum):
 
 class User(Base):
 
-    __tablename__ = "user"
+    __tablename__ = "user_mirea"
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     first_name: Mapped[str] = Column(String)
@@ -35,7 +35,7 @@ class User(Base):
     # academic_degree = Column(PgEnum(AcademicDegree, name="academic_degree", create_type=False), nullable=False)
     # scientific_field = Column(PgEnum(ScientificField, name="scientific_field", create_type=False), nullable=False)
     password: Mapped[str] = Column(String)
-    role = Column(PgEnum(UserRole, name="role", create_type=False))
+    role = Column(PgEnum(UserRole, name="role", create_type=True))
     departament_id = Column(Integer, ForeignKey("departament.id"))
     is_active: Mapped[bool] = Column(Boolean, default=False)
     is_superuser: Mapped[bool] = Column(Boolean, default=False)
