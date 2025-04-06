@@ -1,4 +1,6 @@
-from sqlalchemy import select
+from typing import Sequence
+
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,3 +31,20 @@ class UserDAO:
         query = select(User).where(User.id == user_id)
         user = await session.execute(query)
         return user.scalar_one_or_none()
+
+    @classmethod
+    @connection
+    async def not_activated_users(cls, session: AsyncSession) -> Sequence[User]:
+        query = select(User).where(User.is_active == False)
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    @classmethod
+    @connection
+    async def activate_user_by_id(cls, user_id: int, session: AsyncSession):
+        print(f"Активация пользователя {user_id}")
+        stmt = update(User).where(User.id == user_id).values(is_active=True)
+        result = await session.execute(stmt)
+        await session.commit()
+        print(result)
+        return result.rowcount
