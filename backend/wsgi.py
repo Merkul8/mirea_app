@@ -5,10 +5,16 @@ from contextlib import asynccontextmanager
 
 import config
 from app.auth.routs import auth_router
+from app.parsers.scripts.publication_services_types import services_categories_to_db
+from database.filling import add_roles, add_departments
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
+    # await services_categories_to_db()
+    # await add_roles()
+    # await add_departments()
 
     logger.info("Сервер запущен")
     yield
