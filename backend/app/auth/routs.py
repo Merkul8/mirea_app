@@ -46,7 +46,6 @@ async def refresh_user(response: Response, refresh_token: str = Cookie(None)) ->
         return {"status": 500, "message": "Ошибка генерации нового refresh токена"}
 
 
-
 @auth_router.post("/logout/")
 async def logout_user(response: Response) -> dict:
     response.delete_cookie(key="users_access_token")

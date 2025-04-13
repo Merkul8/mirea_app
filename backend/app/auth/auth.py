@@ -49,7 +49,7 @@ async def refresh_access_token(refresh_token: str):
         auth_data['refresh_secret_key'],
         algorithms=[auth_data['algorithm']]
     )
-    user_id = payload.get("sub")  # или другой ключ, по которому хранится email
+    user_id = payload.get("sub")
     if user_id is None:
         return None
 
