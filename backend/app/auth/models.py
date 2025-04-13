@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
-from sqlalchemy.dialects.postgresql import ENUM as PgEnum
-import enum
+from typing import List
 
-from sqlalchemy.orm import Mapped, validates
+from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
+
+from sqlalchemy.orm import Mapped, validates, relationship
 
 from database.db import Base
 
@@ -16,11 +16,22 @@ class EmployeeMetrics(Base):
     user_id = Column(Integer, ForeignKey("user_mirea.id"))
 
 
-class UserRole(enum.Enum):
-    assistant = "Ассистент"
-    teacher = "Преподаватель"
-    department_chair = "Заведующий кафедрой"
-    rector_office = "Ответственный от ректората"
+class Role(Base):
+    __tablename__ = "role"
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    name: Mapped[str] = Column(String, unique=True)
+    users: Mapped[List["User"]] = relationship(secondary="user_role", back_populates="roles")
+
+    def __repr__(self):
+        return f"Role(name={self.name})"
+
+
+class UserRole(Base):
+    __tablename__ = "user_role"
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    role_id = Column(Integer, ForeignKey("role.id"), index=True)
+    user_id = Column(Integer, ForeignKey("user_mirea.id"), index=True)
 
 
 class User(Base):
@@ -35,10 +46,12 @@ class User(Base):
     # academic_degree = Column(PgEnum(AcademicDegree, name="academic_degree", create_type=False), nullable=False)
     # scientific_field = Column(PgEnum(ScientificField, name="scientific_field", create_type=False), nullable=False)
     password: Mapped[str] = Column(String)
-    role = Column(PgEnum(UserRole, name="role", create_type=True))
     departament_id = Column(Integer, ForeignKey("departament.id"))
+    is_active_email: Mapped[bool] = Column(Boolean, default=False)
     is_active: Mapped[bool] = Column(Boolean, default=False)
     is_superuser: Mapped[bool] = Column(Boolean, default=False)
+
+    roles: Mapped[List["Role"]] = relationship(secondary="user_role", back_populates="users")
 
     def __repr__(self):
         return f"User(id={self.id})"
@@ -57,6 +70,7 @@ class Departament(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     title: Mapped[str] = Column(String)
     institute_id = Column(Integer, ForeignKey("institute.id"))
+    institute: Mapped["Institute"] = relationship(back_populates="departments")
 
     def __repr__(self):
         return f"Departament(id={self.id})"
@@ -68,6 +82,7 @@ class Institute(Base):
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     title: Mapped[str] = Column(String)
+    departments: Mapped[list["Departament"]] = relationship(back_populates="institute")
 
     def __repr__(self):
         return f"Institute(id={self.id})"
