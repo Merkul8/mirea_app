@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie
+from starlette.responses import JSONResponse
 
 from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
     refresh_access_token
@@ -21,15 +22,24 @@ async def register_user(user_data: UserRegister) -> dict:
             detail='Пользователь уже существует'
         )
     user_data.password = get_password_hash(user_data.password)
-    code = await UserDAO.create_user(user_data.dict())
+    code, user_id = await UserDAO.create_user(user_data.dict())
     # send_email.delay(subject="Код активации", to_email=user_data.email, content=code)
     await Sender.send(to_email=str(user_data.email), subject="Код активации", content=code)
-    return {"message": f"Вы зарегистрированы в системе, на почту {user_data.email} придет сообщение об активации"}
+    return {"message": f"Вы зарегистрированы в системе, на почту {user_data.email} придет сообщение об активации", "user_id": user_id}
 
 
 @auth_router.post("/activate_account/")
-async def activate_user(current_user: User = Depends(get_current_user)) -> dict:
-    pass
+async def activate_user(user_id, activation_code):
+    user = await UserDAO.find_one_or_none_by_id(user_id)
+    code_instance = await ActivateCodeDAO.get_by_id_or_none(user.id)
+    if code_instance.code == activation_code:
+        await UserDAO.activate_user_email(user.id)
+        content = {"message": f"Почта {user.email} пользователя с id {user.id} подтверждена."}
+        return JSONResponse(content=content, status_code=200)
+    else:
+        content = {"message": f"Неверно введен код подтверждения почты."}
+        return JSONResponse(content=content, status_code=404)
+
 
 
 @auth_router.post("/login/")

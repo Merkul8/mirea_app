@@ -20,7 +20,7 @@ class UserDAO:
 
     @classmethod
     @connection
-    async def create_user(cls, data, session: AsyncSession) -> str:
+    async def create_user(cls, data, session: AsyncSession) -> tuple[str, int]:
         role = await session.execute(
             select(Role).where(Role.name == data.get("role"))
         )
@@ -33,13 +33,9 @@ class UserDAO:
         session.add(user)
         await session.flush()
 
-        user_role = UserRole(user_id=user.id, role_id=role.id)
-        session.add(user_role)
+        activation_code = await ActivateCodeDAO.add_code(user_id=user.id, session=session)
         await session.commit()
-        activation_code = await ActivateCodeDAO.add_code(user_id=user.id)
-        print(activation_code)
-        await session.commit()
-        return activation_code
+        return activation_code, user.id
 
     @classmethod
     @connection
@@ -51,7 +47,10 @@ class UserDAO:
     @classmethod
     @connection
     async def not_activated_users(cls, session: AsyncSession) -> Sequence[User]:
-        query = select(User).where(User.is_active == False)
+        query = select(User).where(
+            User.is_active == False,
+            User.is_active_email == True
+        )
         result = await session.execute(query)
         return result.scalars().all()
 
@@ -65,13 +64,26 @@ class UserDAO:
         print(result)
         return result.rowcount
 
+    @classmethod
+    @connection
+    async def activate_user_email(cls, user_id, session: AsyncSession):
+        stmt = update(User).where(User.id == user_id).values(is_active_email=True)
+        await session.execute(stmt)
+        await session.commit()
+
 
 class ActivateCodeDAO:
 
     @classmethod
-    @connection
     async def add_code(cls, user_id: int, session: AsyncSession) -> str:
         instance = ActivateCode(user_id=user_id, code=str(randint(10000, 99999)))
         session.add(instance)
         await session.flush()
         return instance.code
+
+    @classmethod
+    @connection
+    async def get_by_id_or_none(cls, user_id: int, session: AsyncSession) -> ActivateCode:
+        query = select(ActivateCode).where(ActivateCode.user_id == user_id)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
