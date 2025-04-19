@@ -14,6 +14,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 CATEGORIES_PUBLIC_SERVICES_PATH = os.getenv("CATEGORIES_PUBLIC_SERVICES_PATH")
 
+REDIS_URL = os.getenv("REDIS_URL")
+
 
 def get_db_url():
     return f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

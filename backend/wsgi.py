@@ -17,11 +17,11 @@ async def lifespan(app: FastAPI):
     # await add_roles()
     # await add_departments()
 
-    await Sender.send(
-        to_email="max.merkulov.00@mail.ru",
-        subject="TEST",
-        content="TEST",
-    )
+    # await Sender.send(
+    #     to_email="max.merkulov.00@mail.ru",
+    #     subject="TEST",
+    #     content="TEST",
+    # )
 
     logger.info("Сервер запущен")
     yield

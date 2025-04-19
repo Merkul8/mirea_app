@@ -1,11 +1,12 @@
+
 from typing import Sequence
 
 from sqlalchemy import select, update
-from sqlalchemy.dialects.postgresql import insert
+from random import randint
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.db import connection
-from app.auth.models import User, Role, UserRole
+from app.auth.models import User, Role, UserRole, ActivateCode
 
 
 class UserDAO:
@@ -19,13 +20,14 @@ class UserDAO:
 
     @classmethod
     @connection
-    async def create_user(cls, data, session: AsyncSession) -> User:
+    async def create_user(cls, data, session: AsyncSession) -> str:
         role = await session.execute(
             select(Role).where(Role.name == data.get("role"))
         )
         role = role.scalar_one_or_none()
         if not role:
             raise ValueError("Не передана роль пользователя.")
+        del data["role"]
         user = User(**data)
         user.roles.append(role)
         session.add(user)
@@ -33,10 +35,11 @@ class UserDAO:
 
         user_role = UserRole(user_id=user.id, role_id=role.id)
         session.add(user_role)
-
         await session.commit()
-
-        return user
+        activation_code = await ActivateCodeDAO.add_code(user_id=user.id)
+        print(activation_code)
+        await session.commit()
+        return activation_code
 
     @classmethod
     @connection
@@ -61,3 +64,14 @@ class UserDAO:
         await session.commit()
         print(result)
         return result.rowcount
+
+
+class ActivateCodeDAO:
+
+    @classmethod
+    @connection
+    async def add_code(cls, user_id: int, session: AsyncSession) -> str:
+        instance = ActivateCode(user_id=user_id, code=str(randint(10000, 99999)))
+        session.add(instance)
+        await session.flush()
+        return instance.code

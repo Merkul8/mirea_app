@@ -2,7 +2,7 @@ from typing import List
 
 from sqlalchemy import Column, Integer, ForeignKey, String, Boolean
 
-from sqlalchemy.orm import Mapped, validates, relationship
+from sqlalchemy.orm import Mapped, validates, relationship, mapped_column
 
 from database.db import Base
 
@@ -86,3 +86,12 @@ class Institute(Base):
 
     def __repr__(self):
         return f"Institute(id={self.id})"
+
+
+class ActivateCode(Base):
+    __tablename__ = "activate_code"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user_mirea.id"), index=True, unique=True)
+    code: Mapped[str] = mapped_column(String)
+

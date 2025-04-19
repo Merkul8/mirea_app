@@ -2,10 +2,12 @@ from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie
 
 from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
     refresh_access_token
-from app.auth.dao import UserDAO
+from app.auth.dao import UserDAO, ActivateCodeDAO
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from app.auth.shemas import UserRegister, UserLogin
+from app.notification.sender import Sender
+from background.worker import send_email
 
 auth_router = APIRouter(tags=["Авторизация и аутентификация"])
 
@@ -19,8 +21,15 @@ async def register_user(user_data: UserRegister) -> dict:
             detail='Пользователь уже существует'
         )
     user_data.password = get_password_hash(user_data.password)
-    await UserDAO.create_user(user_data.dict())
+    code = await UserDAO.create_user(user_data.dict())
+    # send_email.delay(subject="Код активации", to_email=user_data.email, content=code)
+    await Sender.send(to_email=str(user_data.email), subject="Код активации", content=code)
     return {"message": f"Вы зарегистрированы в системе, на почту {user_data.email} придет сообщение об активации"}
+
+
+@auth_router.post("/activate_account/")
+async def activate_user(current_user: User = Depends(get_current_user)) -> dict:
+    pass
 
 
 @auth_router.post("/login/")
