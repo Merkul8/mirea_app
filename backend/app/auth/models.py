@@ -43,6 +43,7 @@ class User(Base):
     last_name: Mapped[str] = Column(String)
     patronymic: Mapped[str] = Column(String)
     email: Mapped[str] = Column(String)
+    elibrary_id: Mapped[int] = Column(Integer)
     # academic_degree = Column(PgEnum(AcademicDegree, name="academic_degree", create_type=False), nullable=False)
     # scientific_field = Column(PgEnum(ScientificField, name="scientific_field", create_type=False), nullable=False)
     password: Mapped[str] = Column(String)
