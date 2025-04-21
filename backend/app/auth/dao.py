@@ -1,4 +1,3 @@
-
 from typing import Sequence
 
 from sqlalchemy import select, update
@@ -6,7 +5,7 @@ from random import randint
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.db import connection
-from app.auth.models import User, Role, UserRole, ActivateCode
+from app.auth.models import User, Role, UserRole, ActivateCode, Departament
 
 
 class UserDAO:
@@ -57,11 +56,9 @@ class UserDAO:
     @classmethod
     @connection
     async def activate_user_by_id(cls, user_id: int, session: AsyncSession):
-        print(f"Активация пользователя {user_id}")
         stmt = update(User).where(User.id == user_id).values(is_active=True)
         result = await session.execute(stmt)
         await session.commit()
-        print(result)
         return result.rowcount
 
     @classmethod
@@ -70,6 +67,23 @@ class UserDAO:
         stmt = update(User).where(User.id == user_id).values(is_active_email=True)
         await session.execute(stmt)
         await session.commit()
+
+    @classmethod
+    @connection
+    async def get_users_by_departament(cls, dep_id: int, session: AsyncSession) -> Sequence[User]:
+        query = select(User).join(Departament, Departament.id == User.departament_id).where(Departament.id == dep_id)
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    @classmethod
+    @connection
+    async def get_user_roles(cls, user_id: int, session: AsyncSession) -> list[str]:
+        query = select(Role).join(
+            UserRole, UserRole.role_id == Role.id).join(
+            User, User.id == UserRole.user_id).where(
+            User.id == user_id)
+        result = await session.execute(query)
+        return [instance.name for instance in result.scalars().all()]
 
 
 class ActivateCodeDAO:
@@ -87,3 +101,29 @@ class ActivateCodeDAO:
         query = select(ActivateCode).where(ActivateCode.user_id == user_id)
         result = await session.execute(query)
         return result.scalar_one_or_none()
+
+
+class DepartamentDAO:
+
+    @classmethod
+    @connection
+    async def dep_by_id(cls, dep_id: int, session: AsyncSession) -> Departament:
+        query = select(Departament).where(Departament.id == dep_id)
+        result = await session.execute(query)
+        return result.scalar()
+
+
+class RoleDAO:
+
+    @classmethod
+    @connection
+    async def get_role_by_name(cls, name: str, session: AsyncSession) -> Role:
+        query = select(Role).where(Role.name == name)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
+
+    @classmethod
+    @connection
+    async def add_user_role(cls, role: UserRole, session: AsyncSession) -> None:
+        session.add(role)
+        await session.commit()

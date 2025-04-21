@@ -9,6 +9,7 @@ class UserRegister(BaseModel):
     first_name: str = Field(..., min_length=3, max_length=50, description="Имя, от 3 до 50 символов")
     last_name: str = Field(..., min_length=3, max_length=50, description="Фамилия, от 3 до 50 символов")
     patronymic: str = Field(..., min_length=3, max_length=50, description="Отчество, от 3 до 50 символов")
+    elibrary_id: int = Field(..., description="ID пользователя в системе elibrary.")
     role: str = Field(..., description="Роль")
     departament_id: int = Field(..., description="ID кафедры")
 

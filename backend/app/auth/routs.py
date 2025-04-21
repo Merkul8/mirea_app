@@ -1,14 +1,18 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie
+from typing import Union, Any, Coroutine
+
+from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
 from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
     refresh_access_token
-from app.auth.dao import UserDAO, ActivateCodeDAO
+from app.auth.dao import UserDAO, ActivateCodeDAO, DepartamentDAO, RoleDAO
 from app.auth.dependencies import get_current_user
-from app.auth.models import User
+from app.auth.models import User, UserRole
 from app.auth.shemas import UserRegister, UserLogin
 from app.notification.sender import Sender
 from background.worker import send_email
+from database.db import engine_session
 
 auth_router = APIRouter(tags=["Авторизация и аутентификация"])
 
@@ -25,12 +29,15 @@ async def register_user(user_data: UserRegister) -> dict:
     code, user_id = await UserDAO.create_user(user_data.dict())
     # send_email.delay(subject="Код активации", to_email=user_data.email, content=code)
     await Sender.send(to_email=str(user_data.email), subject="Код активации", content=code)
-    return {"message": f"Вы зарегистрированы в системе, на почту {user_data.email} придет сообщение об активации", "user_id": user_id}
+    return {"message": f"Вы зарегистрированы в системе, на почту {user_data.email} придет сообщение об активации",
+            "user_id": user_id}
 
 
 @auth_router.post("/activate_account/")
 async def activate_user(user_id, activation_code):
     user = await UserDAO.find_one_or_none_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден в системе.")
     code_instance = await ActivateCodeDAO.get_by_id_or_none(user.id)
     if code_instance.code == activation_code:
         await UserDAO.activate_user_email(user.id)
@@ -41,18 +48,21 @@ async def activate_user(user_id, activation_code):
         return JSONResponse(content=content, status_code=404)
 
 
-
 @auth_router.post("/login/")
 async def login_user(response: Response, user_data: UserLogin) -> dict:
     check = await authenticate_user(email=user_data.email, password=user_data.password)
     if check is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Неверная почта или пароль')
-    access_token = create_access_token({"sub": str(check.id)})
-    refresh_token = create_refresh_token({"sub": str(check.id)})
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
-    return {'access_token': access_token, 'refresh_token': refresh_token}
+    if check.is_active:
+        access_token = create_access_token({"sub": str(check.id)})
+        refresh_token = create_refresh_token({"sub": str(check.id)})
+        response.set_cookie(key="access_token", value=access_token, httponly=True)
+        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+        return {'access_token': access_token, 'refresh_token': refresh_token}
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Аккаунт ещё не активирован, ждите подтверждения администратором.")
 
 
 @auth_router.post("/refresh/")
@@ -76,6 +86,30 @@ async def get_me(user_data: User = Depends(get_current_user)):
     return user_data
 
 
+@auth_router.patch("/add-role/")
+async def add_role_to_user(
+        user_id: int = Query(..., description="ID пользователя"),
+        role_name: str = Query(..., description="Роль"),
+        user: User = Depends(get_current_user)
+) -> dict:
+    if user.is_superuser:
+        role = await RoleDAO.get_role_by_name(role_name)
+        user = await UserDAO.find_one_or_none_by_id(user_id)
+        user_roles = await UserDAO.get_user_roles(user_id=user.id)
+        if role.name in user_roles:
+            return {"status_code": 200, "message": f"У пользователя с id {user.id} уже есть роль {role.name}."}
+        if user is None:
+            raise HTTPException(status_code=404, detail=f"Пользователь с id {user_id} не найден.")
+        if role is None:
+            raise HTTPException(status_code=404, detail=f"Неправильно введена роль.")
+        user_role = UserRole(role_id=role.id, user_id=user.id)
+        await RoleDAO.add_user_role(user_role)
+        return {"status_code": 200, "data": user_role.id}
+
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
 @auth_router.get("/users_to_activate/")
 async def users_to_activate(user_data: User = Depends(get_current_user)):
     if user_data.is_superuser:
@@ -91,5 +125,15 @@ async def activate_user(user_id: int, user_data: User = Depends(get_current_user
         await UserDAO.activate_user_by_id(user_id=user_id)
         # send_message to user_id
         return {"status_code": 200, "message": f"Пользователь с id {user_id} активирован."}
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.get("/department-staff/")
+async def department_staff(user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(user.id)
+    if "boss" in roles:
+        users = await UserDAO.get_users_by_departament(dep_id=user.departament_id)
+        return users
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
