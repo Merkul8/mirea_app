@@ -12,9 +12,9 @@ celery_app = Celery(
 )
 
 celery_app.conf.broker_connection_retry_on_startup = True
-celery_app.conf.beat_schedule = {
-    ...
-}
+# celery_app.conf.beat_schedule = {
+#     ...
+# }
 
 
 @celery_app.task(name="send_email")
