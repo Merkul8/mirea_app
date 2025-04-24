@@ -1,18 +1,15 @@
-from typing import Union, Any, Coroutine
 
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
 from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
     refresh_access_token
-from app.auth.dao import UserDAO, ActivateCodeDAO, DepartamentDAO, RoleDAO
+from app.auth.dao import UserDAO, ActivateCodeDAO, RoleDAO, MetricsDAO
 from app.auth.dependencies import get_current_user
 from app.auth.models import User, UserRole
 from app.auth.shemas import UserRegister, UserLogin
 from app.notification.sender import Sender
-from background.worker import send_email
-from database.db import engine_session
+
 
 auth_router = APIRouter(tags=["Авторизация и аутентификация"])
 
@@ -129,11 +126,45 @@ async def activate_user(user_id: int, user_data: User = Depends(get_current_user
         return {"status_code": 403, "message": "Недостаточно прав."}
 
 
-@auth_router.get("/department-staff/")
-async def department_staff(user: User = Depends(get_current_user)):
+@auth_router.get("/department-users/")
+async def department_users(user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(user.id)
     if "boss" in roles:
         users = await UserDAO.get_users_by_departament(dep_id=user.departament_id)
         return users
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+# @auth_router.get("/users/{user_id}")
+# async def get_users(user_id: int, current_user: User = Depends(get_current_user)):
+#     user = await UserDAO.find_one_or_none_by_id(user_id)
+#     return user
+
+
+@auth_router.get("/metrics/{user_id}")
+async def get_metrics(user_id: int, current_user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(current_user.id)
+    if "boss" in roles:
+        metric = await MetricsDAO.get_metrics_by_user_id(user_id=user_id)
+        return metric
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.patch("/metrics/update/{user_id}")
+async def update_metrics(user_id: int, pub_count: int, current_user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(current_user.id)
+    if "boss" in roles:
+        await MetricsDAO.update_metrics_by_user_id(user_id=user_id, pub_count=pub_count)
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.post("/metrics/create")
+async def create_metrics(user_id: int, publication_count: int, current_user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(current_user.id)
+    if "boss" in roles:
+        await MetricsDAO.create_metrics(user_id=user_id, pub_count=publication_count)
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
