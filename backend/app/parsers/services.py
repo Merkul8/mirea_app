@@ -74,8 +74,7 @@ class ElibraryParser:
 
             # Проверка на CAPTCHA
             if "необычно много запросов" in self.driver.page_source:
-                print("Обнаружена CAPTCHA, требуется ручное решение")
-                input("Пожалуйста, решите CAPTCHA в браузере и нажмите Enter...")
+                print("Обнаружена капча...")
                 time.sleep(2)
 
             html = self.driver.page_source
@@ -92,13 +91,30 @@ class ElibraryParser:
                 cols = row.find_all('td')
                 if len(cols) >= 3:
                     pub_num = cols[0].get_text(strip=True)
-                    pub_title = cols[1].find('b').get_text(' ', strip=True) if cols[1].find('b') else ''
-                    authors = cols[1].find('i').get_text(' ', strip=True) if cols[1].find('i') else ''
-                    journal_info = cols[1].contents[-1].strip()
-                    citations = cols[2].get_text(strip=True)
 
-                    # Очистка данных
+                    # Извлечение заголовка
+                    title_tag = cols[1].find('b')
+                    if not title_tag:
+                        title_tag = cols[1].find('span', {'style': 'line-height:1.0;'})
+                    pub_title = title_tag.get_text(' ', strip=True) if title_tag else ''
+
+                    # Извлечение авторов
+                    authors_tag = cols[1].find('i')
+                    authors = authors_tag.get_text(' ', strip=True) if authors_tag else ''
+
+                    # Извлечение информации о журнале - берем последний текстовый элемент
+                    journal_info = ''
+                    for content in cols[1].contents:
+                        if isinstance(content, str) and content.strip():
+                            journal_info = content.strip()
+                        elif content.name == 'div' or content.name == 'table':
+                            break  # Прерываем, если встречаем дополнительные блоки
+
+                    # Очистка информации о журнале
                     journal_info = ' '.join(journal_info.split())
+
+                    # Извлечение цитирований
+                    citations = cols[2].get_text(strip=True)
 
                     publications.append({
                         'number': pub_num,

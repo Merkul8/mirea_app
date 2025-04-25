@@ -1,12 +1,17 @@
+from pprint import pprint
+
 import uvicorn
 from fastapi import FastAPI
 from logger import logger
 from contextlib import asynccontextmanager
 
 import config
+from app.auth.dao import UserDAO
 from app.auth.routs import auth_router
 from app.notification.sender import Sender
+from app.parsers.dao import ParserDAO
 from app.parsers.scripts.publication_services_types import services_categories_to_db
+from app.parsers.services import ElibraryParser
 from database.filling import add_roles, add_departments
 
 
@@ -22,6 +27,11 @@ async def lifespan(app: FastAPI):
     #     subject="TEST",
     #     content="TEST",
     # )
+    # user = await UserDAO.find_one_or_none_by_id(user_id=1)
+    # author_data = ElibraryParser(user.elibrary_id)
+    # data = author_data.elibrary_data()
+    # pprint(data)
+    # await ParserDAO.create_publications(data, user)
 
     logger.info("Сервер запущен")
     yield

@@ -1,3 +1,4 @@
+from pprint import pprint
 
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie, Query
 from starlette.responses import JSONResponse
@@ -9,7 +10,8 @@ from app.auth.dependencies import get_current_user
 from app.auth.models import User, UserRole
 from app.auth.shemas import UserRegister, UserLogin
 from app.notification.sender import Sender
-
+from app.parsers.dao import ParserDAO
+from app.parsers.services import ElibraryParser
 
 auth_router = APIRouter(tags=["Авторизация и аутентификация"])
 
@@ -120,6 +122,10 @@ async def users_to_activate(user_data: User = Depends(get_current_user)):
 async def activate_user(user_id: int, user_data: User = Depends(get_current_user)):
     if user_data.is_superuser:
         await UserDAO.activate_user_by_id(user_id=user_id)
+        author_data = ElibraryParser(user_data.elibrary_id)
+        data = author_data.elibrary_data()
+        pprint(data)
+        await ParserDAO.create_publications(data, user_data)
         # send_message to user_id
         return {"status_code": 200, "message": f"Пользователь с id {user_id} активирован."}
     else:

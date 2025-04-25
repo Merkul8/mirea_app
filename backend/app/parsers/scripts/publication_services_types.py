@@ -1,5 +1,5 @@
 import pandas as pd
-from app.parsers.models import PublicService, ServiceType
+from app.auth.models import PublicService, ServiceType
 from database.db import engine_session
 import config
 

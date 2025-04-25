@@ -1,8 +1,8 @@
-"""init
+"""edit
 
-Revision ID: 7b030fab8d7e
+Revision ID: 78f3e5a1373e
 Revises: 
-Create Date: 2025-04-13 19:57:54.867824
+Create Date: 2025-04-25 20:47:34.775934
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '7b030fab8d7e'
+revision: str = '78f3e5a1373e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -47,10 +47,14 @@ def upgrade() -> None:
     )
     op.create_table('publication',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('url', sa.String(), nullable=True),
+    sa.Column('citations', sa.String(), nullable=True),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('public_service_id', sa.Integer(), nullable=True),
+    sa.Column('public_service', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('authors', sa.String(), nullable=True),
+    sa.Column('publication_year', sa.String(), nullable=True),
+    sa.Column('author_type', postgresql.ENUM('collaborator', 'author', name='author_type'), nullable=False),
     sa.ForeignKeyConstraint(['public_service_id'], ['public_service.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -60,13 +64,23 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(), nullable=True),
     sa.Column('patronymic', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
+    sa.Column('elibrary_id', sa.Integer(), nullable=True),
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('departament_id', sa.Integer(), nullable=True),
+    sa.Column('is_active_email', sa.Boolean(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('is_superuser', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['departament_id'], ['departament.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('activate_code',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('code', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user_mirea.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_activate_code_user_id'), 'activate_code', ['user_id'], unique=True)
     op.create_table('employee_metrics',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('publication_count', sa.Integer(), nullable=True),
@@ -87,7 +101,6 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('publication_id', sa.Integer(), nullable=True),
-    sa.Column('service_type', postgresql.ENUM('collaborator', 'author', name='author_type'), nullable=False),
     sa.ForeignKeyConstraint(['publication_id'], ['publication.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user_mirea.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -114,6 +127,8 @@ def downgrade() -> None:
     op.drop_table('user_publication')
     op.drop_table('report')
     op.drop_table('employee_metrics')
+    op.drop_index(op.f('ix_activate_code_user_id'), table_name='activate_code')
+    op.drop_table('activate_code')
     op.drop_table('user_mirea')
     op.drop_table('publication')
     op.drop_table('departament')
