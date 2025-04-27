@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 import config
 from app.auth.dao import UserDAO
 from app.auth.routs import auth_router
+from app.report.routs import report_router
 from app.notification.sender import Sender
 from app.parsers.dao import ParserDAO
 from app.parsers.scripts.publication_services_types import services_categories_to_db
@@ -40,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(router=auth_router)
-
+app.include_router(router=report_router)
 
 if __name__ == "__main__":
     if config.MODE == "DEV":

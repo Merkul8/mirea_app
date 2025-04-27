@@ -11,6 +11,9 @@ class UserRegister(BaseModel):
     patronymic: str = Field(..., min_length=3, max_length=50, description="Отчество, от 3 до 50 символов")
     elibrary_id: int = Field(..., description="ID пользователя в системе elibrary.")
     role: str = Field(..., description="Роль")
+    work_type: str = Field(..., description="Тип трудоустройства")
+    post: str = Field(..., description="Должность")
+    academic_degree: str = Field(..., description="Ученая степень")
     departament_id: int = Field(..., description="ID кафедры")
 
 

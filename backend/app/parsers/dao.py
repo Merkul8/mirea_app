@@ -1,9 +1,11 @@
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dao import UserDAO
-from app.auth.models import Publication, PublicService, User, AuthorType
-from database.db import engine_session
+from app.auth.models import Publication, PublicService, User, AuthorType, UserPublication
+from database.db import engine_session, connection
 from transliterate import translit
 
 
@@ -50,6 +52,21 @@ class ParserDAO:
                     # print(instance.title)
                     session.add(instance)
                 await session.commit()
+
+    @classmethod
+    @connection
+    async def get_user_publications(cls, user_id: int, session: AsyncSession):
+        # year = str(datetime.now().year)
+        year = "2024"
+        query = (select(Publication)
+                 .join(UserPublication, UserPublication.publication_id == Publication.id)
+                 .join(User,User.id == UserPublication.user_id)
+                 .where(and_(
+            User.id == user_id,
+            Publication.publication_year == year,
+                             )))
+        result = await session.execute(query)
+        return result.scalars().all()
 
 
 class PublicationServiceDAO:

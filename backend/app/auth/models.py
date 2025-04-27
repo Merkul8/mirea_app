@@ -45,13 +45,15 @@ class User(Base):
     patronymic: Mapped[str] = Column(String)
     email: Mapped[str] = Column(String)
     elibrary_id: Mapped[int] = Column(Integer)
-    # academic_degree = Column(PgEnum(AcademicDegree, name="academic_degree", create_type=False), nullable=False)
-    # scientific_field = Column(PgEnum(ScientificField, name="scientific_field", create_type=False), nullable=False)
     password: Mapped[str] = Column(String)
     departament_id = Column(Integer, ForeignKey("departament.id"))
     is_active_email: Mapped[bool] = Column(Boolean, default=False)
     is_active: Mapped[bool] = Column(Boolean, default=False)
     is_superuser: Mapped[bool] = Column(Boolean, default=False)
+    work_type: Mapped[str] = Column(String)
+    post: Mapped[str] = Column(String)
+    academic_degree: Mapped[str] = Column(String)
+
 
     roles: Mapped[List["Role"]] = relationship(secondary="user_role", back_populates="users")
     publications: Mapped[List["Publication"]] = relationship(secondary="user_publication", back_populates="users")
