@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dao import UserDAO
@@ -76,6 +76,18 @@ class ParserDAO:
                                  )))
         result = await session.execute(query)
         return result.scalars().all()
+
+    @classmethod
+    @connection
+    async def update_publication(cls, pub_data: dict, session: AsyncSession):
+        const_author = {
+            "автор": "author",
+            "соавтор": "collaborator"
+        }
+        pub_data["author_type"] = const_author[pub_data["author_type"]]
+        stmt = update(Publication).where(Publication.id == pub_data["id"]).values(**pub_data)
+        await session.execute(stmt)
+        await session.commit()
 
 
 class PublicationServiceDAO:

@@ -111,7 +111,7 @@ export default function ProfileEditPage() {
 
                 <div className="btns">
                     <button type="submit" className="edit-btn">Сохранить изменения</button>
-                    <button type="button" className="cancel-btn" onClick={() => navigate("/profile")}>Отмена</button>
+                    <button type="button" className="cancel-btn" onClick={() => navigate("/me")}>Отмена</button>
                 </div>
             </form>
         </div>

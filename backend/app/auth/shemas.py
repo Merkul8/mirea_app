@@ -67,3 +67,13 @@ class DepartamentMetric(BaseModel):
     rinc_count: int = Field(...)
     message: str = Field(...)
     departament_id: int = Field(...)
+
+
+class PublicationData(BaseModel):
+    id: int
+    citations: str
+    title: str
+    public_service: str
+    authors: str
+    publication_year: str
+    author_type: str

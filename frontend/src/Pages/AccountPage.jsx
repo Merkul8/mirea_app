@@ -1,19 +1,28 @@
-import {backendUrls} from "../Utils/urls.js";
-import {useState, useEffect} from "react";
-import {useNavigate} from "react-router-dom";
+import { backendUrls } from "../Utils/urls.js";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from 'react-modal';
 import '../Components/Auth/Account/Account.css';
-
 
 export default function AccountPage() {
 
     const [userData, setUserData] = useState(null);
     const [publications, setPublications] = useState([]);
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [pubLoading, setPubLoading] = useState(true);
     const [pubError, setPubError] = useState(null);
+
+    const [editingPublication, setEditingPublication] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        id: '',
+        citations: '',
+        title: '',
+        public_service: '',
+        authors: '',
+        publication_year: '',
+        author_type: '',
+    });
 
     const navigate = useNavigate();
 
@@ -21,7 +30,7 @@ export default function AccountPage() {
         const fetchUserData = async () => {
             try {
                 const response = await fetch(backendUrls.me, {
-                    credentials: 'include', // Для отправки кук
+                    credentials: 'include',
                 });
 
                 if (!response.ok) {
@@ -33,7 +42,6 @@ export default function AccountPage() {
                 }
 
                 const data = await response.json();
-                console.log(data)
                 setUserData(data);
 
                 const pubResponse = await fetch(backendUrls.userPublications, {
@@ -48,7 +56,7 @@ export default function AccountPage() {
                 setPublications(pubData.data || []);
             } catch (err) {
                 setError(err.message);
-                navigate("/login")
+                navigate("/login");
             } finally {
                 setLoading(false);
                 setPubLoading(false);
@@ -58,6 +66,47 @@ export default function AccountPage() {
         fetchUserData();
     }, [navigate]);
 
+    const openEditModal = (pub) => {
+        setEditFormData(pub);
+        setEditingPublication(pub);
+    };
+
+    const closeEditModal = () => {
+        setEditingPublication(null);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch(backendUrls.updatePublication, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(editFormData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при обновлении публикации');
+            }
+
+            setPublications(prev =>
+                prev.map(pub => (pub.id === editFormData.id ? editFormData : pub))
+            );
+
+            closeEditModal();
+        } catch (err) {
+            console.error(err);
+            alert('Не удалось обновить публикацию.');
+        }
+    };
+
     if (loading) {
         return <div className="loading">Загрузка профиля...</div>;
     }
@@ -65,79 +114,67 @@ export default function AccountPage() {
     if (error) {
         return <div className="error">Ошибка: {error}</div>;
     }
-    console.log(userData)
-    const isBoss = userData.roles && userData.roles.includes('boss')
+
+    const isBoss = userData.roles && userData.roles.includes('boss');
 
     return (
-        <div className="profile-container">
-            <h2>Мой профиль</h2>
-
-            <div className="profile-section">
-                <h3>Основная информация</h3>
-                <div className="profile-field">
-                    <span className="field-label">ФИО:</span>
-                    <span className="field-value">
-            {userData.last_name} {userData.name} {userData.patronymic}
-          </span>
-                </div>
-                <div className="profile-field">
-                    <span className="field-label">Email:</span>
-                    <span className="field-value">{userData.email}</span>
-                </div>
-            </div>
-
-            <div className="profile-section">
-                <h3>Профессиональная информация</h3>
-                <div className="profile-field">
-                    <span className="field-label">Должность:</span>
-                    <span className="field-value">{userData.post}</span>
-                </div>
-                <div className="profile-field">
-                    <span className="field-label">Тип работы:</span>
-                    <span className="field-value">{userData.work_type}</span>
-                </div>
-                <div className="profile-field">
-                    <span className="field-label">Учёная степень:</span>
-                    <span className="field-value">{userData.academic_degree}</span>
-                </div>
-                <div className="profile-field">
-                    <span className="field-label">ELIBRARY ID:</span>
-                    <span className="field-value">{userData.elibrary_id}</span>
-                </div>
-            </div>
-            <div className="row flex justify-content-center align-content-center align-items-center">
-                <div className="col-4">
-                    <button
-                        className="edit-btn"
-                        onClick={() => navigate('/profile/edit')}
-                    >
+        <div className="account-page-container">
+            <div className="header-with-buttons">
+                <h2 className="account-title">Мой профиль</h2>
+                <div className="buttons-grid">
+                    <button className="edit-btn" onClick={() => navigate('/profile/edit')}>
                         Редактировать профиль
                     </button>
-                </div>
-                <div className="col-4">
                     {isBoss && (
-                        <button
-                            className="boss-btn"
-                            onClick={() => navigate('/users/departament')}
-                        >
-                            Управление отделом
-                        </button>
+                        <>
+                            <button className="boss-btn" onClick={() => navigate('/users/departament')}>
+                                Управление отделом
+                            </button>
+                            <button className="boss-btn" onClick={() => navigate('/departament/metrics')}>
+                                Руководство метриками кафедры
+                            </button>
+                        </>
                     )}
                 </div>
-                {isBoss && (
-                    <div className="col-4">
-                        <button
-                            className="boss-btn"
-                            onClick={() => navigate('/departament/metrics')}
-                        >
-                            Руководство метриками кафедры
-                        </button>
-                    </div>
-                )}
             </div>
 
+            <div className="card">
+                <h3>Основная информация</h3>
+                <div className="info-grid">
+                    <div className="info-item">
+                        <span className="info-label">ФИО:</span>
+                        <span className="info-value">{userData.last_name} {userData.name} {userData.patronymic}</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Email:</span>
+                        <span className="info-value">{userData.email}</span>
+                    </div>
+                </div>
+            </div>
 
-            <div className="profile-section">
+            <div className="card">
+                <h3>Профессиональная информация</h3>
+                <div className="info-grid">
+                    <div className="info-item">
+                        <span className="info-label">Должность:</span>
+                        <span className="info-value">{userData.post}</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Тип работы:</span>
+                        <span className="info-value">{userData.work_type}</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Учёная степень:</span>
+                        <span className="info-value">{userData.academic_degree}</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">ELIBRARY ID:</span>
+                        <span className="info-value">{userData.elibrary_id}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card">
                 <h3>Публикации</h3>
                 {pubLoading ? (
                     <div className="loading">Загрузка публикаций...</div>
@@ -146,10 +183,13 @@ export default function AccountPage() {
                 ) : publications.length === 0 ? (
                     <p>У вас пока нет публикаций</p>
                 ) : (
-                    <div className="publications-list">
+                    <div className="publications-grid">
                         {publications.map((pub) => (
-                            <div key={pub.id} className="publication-item">
-                                <h4>{pub.title}</h4>
+                            <div key={pub.id} className="publication-card">
+                                <div className="publication-header">
+                                    <h4>{pub.title}</h4>
+                                    <button className="small-edit-btn" onClick={() => openEditModal(pub)}>✏️</button>
+                                </div>
                                 <p><strong>Авторы:</strong> {pub.authors}</p>
                                 <p><strong>Год:</strong> {pub.publication_year}</p>
                                 <p><strong>Цитирования:</strong> {pub.citations || 'нет данных'}</p>
@@ -163,12 +203,32 @@ export default function AccountPage() {
                 )}
             </div>
 
-            <button
-                className="edit-btn"
-                onClick={() => navigate('/profile/edit')}
+            {/* Модалка редактирования публикации */}
+            <Modal
+                isOpen={!!editingPublication}
+                onRequestClose={closeEditModal}
+                contentLabel="Редактировать публикацию"
+                className="edit-modal"
+                overlayClassName="edit-modal-overlay"
             >
-                Редактировать профиль
-            </button>
+                <h2>Редактировать публикацию</h2>
+                <form onSubmit={handleEditSubmit} className="edit-form">
+                    {Object.keys(editFormData).map((key) => (
+                        key !== "id" ? (
+                            <div key={key} className="form-group">
+                                <label>{key}</label>
+                                <input
+                                    type="text"
+                                    name={key}
+                                    value={editFormData[key] || ''}
+                                    onChange={handleEditChange}
+                                />
+                            </div>
+                        ) : null
+                    ))}
+                    <button type="submit" className="save-btn">Сохранить</button>
+                </form>
+            </Modal>
         </div>
     );
 }

@@ -10,7 +10,7 @@ from app.auth.dao import UserDAO, ActivateCodeDAO, RoleDAO, MetricsDAO
 from app.auth.dependencies import get_current_user
 from app.auth.models import User, UserRole, Publication
 from app.auth.shemas import UserRegister, UserLogin, VerifyUser, UserMetric, DepartamentMetric, UserMetricUpdate, \
-    UserData
+    UserData, PublicationData
 from app.notification.sender import Sender
 from app.parsers.dao import ParserDAO
 from app.parsers.services import ElibraryParser
@@ -264,3 +264,8 @@ async def user_publications_read(user_id: int, current_user: User = Depends(get_
     return {
         "data": [publication.to_dict() for publication in publications],
     }
+
+
+@auth_router.put("/user/publications/update")
+async def update_publication(pub_data: PublicationData, current_user: User = Depends(get_current_user)):
+    await ParserDAO.update_publication(pub_data.dict())

@@ -20,4 +20,5 @@ export const backendUrls = {
   createDepMetric:  buildUrl(baseBackend, "/metrics/departament/create"),
   updateDepMetric:  buildUrl(baseBackend, "/metrics/departament/update"),
   updateUser:  buildUrl(baseBackend, "/users/update"),
+  updatePublication:  buildUrl(baseBackend, "/user/publications/update"),
 }
