@@ -188,7 +188,7 @@ async def get_dep_metrics(departament_id: int, current_user: User = Depends(get_
     return metric
 
 
-@auth_router.put("/metrics/update/{user_id}")
+@auth_router.put("/metrics/update")
 async def update_metrics(metric_data: UserMetric, current_user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:
@@ -197,7 +197,7 @@ async def update_metrics(metric_data: UserMetric, current_user: User = Depends(g
         return {"status_code": 403, "message": "Недостаточно прав."}
 
 
-@auth_router.put("/metrics/departament/update/{user_id}")
+@auth_router.put("/metrics/departament/update")
 async def update_dep_metrics(metric_data: DepartamentMetric, current_user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:

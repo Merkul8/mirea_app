@@ -1,167 +1,281 @@
 .user-detail-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1rem;
 }
 
 .loading {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #3498db;
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #3498db;
 }
 
 .error {
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: #e74c3c;
-  background-color: #fdecea;
-  border-radius: 4px;
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #e74c3c;
+    background-color: #fdecea;
+    border-radius: 4px;
 }
 
 .back-button {
-  background-color: #95a5a6;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.3s;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.3s;
 }
 
 .back-button:hover {
-  background-color: #7f8c8d;
+    background-color: #7f8c8d;
 }
 
 .user-profile-card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
 }
 
 .user-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
 }
 
 .user-header h2 {
-  margin: 0;
-  color: #2c3e50;
+    margin: 0;
+    color: #2c3e50;
 }
 
 .user-id {
-  color: #7f8c8d;
-  font-size: 0.9rem;
+    color: #7f8c8d;
+    font-size: 0.9rem;
 }
 
 .user-info-section {
-  margin-bottom: 2rem;
+    margin-bottom: 2rem;
 }
 
 .user-info-section h3 {
-  color: #3498db;
-  margin-bottom: 1rem;
+    color: #3498db;
+    margin-bottom: 1rem;
 }
 
 .info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
 }
 
 .info-item {
-  margin-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 
 .info-label {
-  font-weight: bold;
-  color: #555;
-  display: block;
-  margin-bottom: 0.2rem;
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 0.2rem;
 }
 
 .info-value {
-  color: #333;
-  padding: 0.4rem 0.6rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  display: inline-block;
-  min-width: 200px;
+    color: #333;
+    padding: 0.4rem 0.6rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 200px;
 }
 
 @media (max-width: 768px) {
-  .user-detail-container {
-    padding: 1rem;
-  }
+    .user-detail-container {
+        padding: 1rem;
+    }
 
-  .user-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
+    .user-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 
 .user-publications {
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  margin: 20px 0;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 20px 0;
 }
 
 .user-publications h3 {
-  margin-bottom: 20px;
-  font-size: 26px;
-  color: #333;
+    margin-bottom: 20px;
+    font-size: 26px;
+    color: #333;
 }
 
 .publications-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .publication-item {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s, transform 0.3s;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .publication-item:hover {
-  background-color: #eef2f7;
-  transform: translateY(-2px);
+    background-color: #eef2f7;
+    transform: translateY(-2px);
 }
 
 .publication-item h4 {
-  margin: 0 0 10px 0;
-  font-size: 22px;
-  color: #222;
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    color: #222;
 }
 
 .publication-item p {
-  margin: 6px 0;
-  color: #555;
+    margin: 6px 0;
+    color: #555;
 }
 
 .publication-item p strong {
-  color: #000;
+    color: #000;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 600px;
+    z-index: 1000;
+}
+
+/* Модальное окно */
+.modal-content {
+    background: #fff;
+    padding: 30px 25px;
+    border-radius: 12px;
+    width: 450px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Плавное появление модалки */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Заголовок модалки */
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Поля формы */
+.modal-content label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Инпуты формы */
+.modal-content input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 5px;
+    font-size: 14px;
+    transition: border 0.2s;
+}
+
+.modal-content input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Кнопки "Сохранить" и "Отмена" */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-buttons button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.modal-buttons button[type="button"] {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modal-buttons button[type="button"]:hover {
+    background-color: #d6d6d6;
+}
+
+/* Кнопка "Редактировать" под метриками */
+.edit-metrics-button {
+    margin-top: 15px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 18px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.edit-metrics-button:hover {
+    background-color: #45a049;
 }

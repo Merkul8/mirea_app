@@ -14,6 +14,9 @@ export default function DepUserRetrieve() {
     const [depMetrics, setDepMetrics] = useState(null);
     const [userMetrics, setUserMetrics] = useState(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState(null);
+
     const navigate = useNavigate();
 
     const [publications, setPublications] = useState([]);
@@ -115,13 +118,14 @@ export default function DepUserRetrieve() {
                             </ul>
                         </div>
                     ) : (
-                        <p>Метрики кафедры отсутствуют или у вас есть персональные метрики</p>
+                        <p>Метрики кафедры отсутствуют или есть персональные метрики</p>
                     )}
 
                     {userMetrics ? (
                         <div className="metrics-block">
                             <h4>Персональные метрики</h4>
                             <ul>
+                                <li>ID: {userMetrics.user_id}</li>
                                 <li>Публикаций: {userMetrics.publication_count}</li>
                                 <li>Авторов: {userMetrics.authors_count}</li>
                                 <li>К1 публикаций: {userMetrics.k1_count}</li>
@@ -130,6 +134,15 @@ export default function DepUserRetrieve() {
                                 <li>РИНЦ публикаций: {userMetrics.rinc_count}</li>
                                 {userMetrics.message && <li>Сообщение: {userMetrics.message}</li>}
                             </ul>
+                            <button
+                                className="edit-metrics-button"
+                                onClick={() => {
+                                    setFormData({...userMetrics}); // Копируем текущие данные в форму
+                                    setIsModalOpen(true);
+                                }}
+                            >
+                                ✏️ Редактировать метрики
+                            </button>
                         </div>
                     ) : (
                         <p>Персональные метрики отсутствуют</p>
@@ -155,9 +168,100 @@ export default function DepUserRetrieve() {
                         <p>У пользователя нет публикаций</p>
                     )}
                 </div>
-                {/* Дополнительные секции можно добавить здесь */}
+                {isModalOpen && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h3>Редактирование метрик</h3>
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    fetch(backendUrls.update_user_metrics, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        credentials: 'include',
+                                        body: JSON.stringify(formData),
+                                    })
+                                        .then(res => {
+                                            if (!res.ok) throw new Error('Ошибка обновления метрик');
+                                            return res.json();
+                                        })
+                                        .then(() => {
+                                            setUserMetrics(formData);
+                                            setIsModalOpen(false);
+                                        })
+                                        .catch(err => alert(err.message));
+                                }}
+                            >
+                                <label>Публикаций:
+                                    <input
+                                        type="number"
+                                        value={formData.publication_count}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            publication_count: Number(e.target.value)
+                                        })}
+                                    />
+                                </label>
+                                <label>Авторов:
+                                    <input
+                                        type="number"
+                                        value={formData.authors_count}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            authors_count: Number(e.target.value)
+                                        })}
+                                    />
+                                </label>
+                                <label>К1 публикаций:
+                                    <input
+                                        type="number"
+                                        value={formData.k1_count}
+                                        onChange={(e) => setFormData({...formData, k1_count: Number(e.target.value)})}
+                                    />
+                                </label>
+                                <label>К2 публикаций:
+                                    <input
+                                        type="number"
+                                        value={formData.k2_count}
+                                        onChange={(e) => setFormData({...formData, k2_count: Number(e.target.value)})}
+                                    />
+                                </label>
+                                <label>К3 публикаций:
+                                    <input
+                                        type="number"
+                                        value={formData.k3_count}
+                                        onChange={(e) => setFormData({...formData, k3_count: Number(e.target.value)})}
+                                    />
+                                </label>
+                                <label>РИНЦ публикаций:
+                                    <input
+                                        type="number"
+                                        value={formData.rinc_count}
+                                        onChange={(e) => setFormData({...formData, rinc_count: Number(e.target.value)})}
+                                    />
+                                </label>
+                                <label>Сообщение:
+                                    <input
+                                        type="text"
+                                        value={formData.message || ''}
+                                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                                    />
+                                </label>
+
+                                <div className="modal-buttons">
+                                    <button type="submit">Сохранить</button>
+                                    <button type="button" onClick={() => setIsModalOpen(false)}>Отмена</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
+
     )
 
 }
