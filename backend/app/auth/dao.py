@@ -5,7 +5,7 @@ from random import randint
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.db import connection
-from app.auth.models import User, Role, UserRole, ActivateCode, Departament, EmployeeMetrics
+from app.auth.models import User, Role, UserRole, ActivateCode, Departament, EmployeeMetrics, DepartamentMetrics
 
 
 class UserDAO:
@@ -147,7 +147,14 @@ class MetricsDAO:
 
     @classmethod
     @connection
-    async def create_metrics(cls, user_id: int, pub_count: int, session: AsyncSession) -> None:
-        instance = EmployeeMetrics(user_id=user_id, publication_count=pub_count)
+    async def create_metrics(cls, data: dict, session: AsyncSession) -> None:
+        instance = EmployeeMetrics(**data)
+        session.add(instance)
+        await session.commit()
+
+    @classmethod
+    @connection
+    async def create_dep_metrics(cls, data: dict, session: AsyncSession) -> None:
+        instance = DepartamentMetrics(**data)
         session.add(instance)
         await session.commit()

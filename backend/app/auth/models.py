@@ -15,6 +15,12 @@ class EmployeeMetrics(Base):
     id: Mapped[int] = Column(Integer, primary_key=True)
     publication_count: Mapped[int] = Column(Integer)
     user_id = Column(Integer, ForeignKey("user_mirea.id"))
+    authors_count: Mapped[int] = Column(Integer)
+    k1_count: Mapped[int] = Column(Integer)
+    k2_count: Mapped[int] = Column(Integer)
+    k3_count: Mapped[int] = Column(Integer)
+    rinc_count: Mapped[int] = Column(Integer)
+    message: Mapped[str] = Column(String)
 
 
 class Role(Base):
@@ -67,6 +73,17 @@ class User(Base):
             raise ValueError("email не прошел валидацию, отсутствует символ '@'.")
         return email
 
+    def to_json(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "patronymic": self.patronymic,
+            "email": self.email,
+            "work_type": self.work_type,
+            "post": self.post,
+            "academic_degree": self.academic_degree,
+        }
 
 class Departament(Base):
 
@@ -80,6 +97,19 @@ class Departament(Base):
     def __repr__(self):
         return f"Departament(id={self.id})"
 
+
+class DepartamentMetrics(Base):
+    __tablename__ = "departament_metrics"
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    publication_count: Mapped[int] = Column(Integer)
+    departament_id = Column(Integer, ForeignKey("departament.id"))
+    authors_count: Mapped[int] = Column(Integer)
+    k1_count: Mapped[int] = Column(Integer)
+    k2_count: Mapped[int] = Column(Integer)
+    k3_count: Mapped[int] = Column(Integer)
+    rinc_count: Mapped[int] = Column(Integer)
+    message: Mapped[str] = Column(String)
 
 class Institute(Base):
 
@@ -152,6 +182,17 @@ class Publication(Base):
 
     def __repr__(self):
         return f"Publication(id={self.id})"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'citations': self.citations,
+            'title': self.title,
+            'public_service': self.public_service,
+            'authors': self.authors,
+            'publication_year': self.publication_year,
+            'author_type': self.author_type.value if self.author_type else None,
+        }
 
 
 class UserPublication(Base):

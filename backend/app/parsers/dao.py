@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,6 +31,7 @@ class ParserDAO:
                     except IndexError:
                         print(publication["journal"])
                         pub_year = "Неопределен"
+                    print(lastname_en, user.last_name, curr_author)
                     if user.last_name.lower() in curr_author or lastname_en.lower() in curr_author:
                         author_type = AuthorType("автор")
                     else:
@@ -55,16 +57,23 @@ class ParserDAO:
 
     @classmethod
     @connection
-    async def get_user_publications(cls, user_id: int, session: AsyncSession):
+    async def get_user_publications(cls, user_id: int, session: AsyncSession, year: Optional[str] = None):
         # year = str(datetime.now().year)
-        year = "2024"
-        query = (select(Publication)
-                 .join(UserPublication, UserPublication.publication_id == Publication.id)
-                 .join(User,User.id == UserPublication.user_id)
-                 .where(and_(
-            User.id == user_id,
-            Publication.publication_year == year,
-                             )))
+        if not year:
+            query = (select(Publication)
+            .join(UserPublication, UserPublication.publication_id == Publication.id)
+            .join(User, User.id == UserPublication.user_id)
+            .where(
+                User.id == user_id,
+            ))
+        else:
+            query = (select(Publication)
+                     .join(UserPublication, UserPublication.publication_id == Publication.id)
+                     .join(User,User.id == UserPublication.user_id)
+                     .where(and_(
+                User.id == user_id,
+                Publication.publication_year == year,
+                                 )))
         result = await session.execute(query)
         return result.scalars().all()
 

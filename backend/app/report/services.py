@@ -27,7 +27,7 @@ class Report:
             raise ValueError("Должен быть передан один из параметров: user or users")
 
     async def get_user_report(self) -> str:
-        data: list[Publication] = await ParserDAO.get_user_publications(self.user.id)
+        data: list[Publication] = await ParserDAO.get_user_publications(self.user.id, year="2024")
         for publication in data:
             await self._add_user_data_row(self.user, publication)
         df = pd.DataFrame(self.report)
@@ -37,7 +37,7 @@ class Report:
 
     async def get_users_report(self) -> str:
         for user in self.users:
-            data: list[Publication] = await ParserDAO.get_user_publications(user.id)
+            data: list[Publication] = await ParserDAO.get_user_publications(user.id, year="2024")
             for publication in data:
                 await self._add_user_data_row(user, publication)
         df = pd.DataFrame(self.report)

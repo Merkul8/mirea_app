@@ -20,3 +20,29 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта")
     password: str = Field(..., min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков")
+
+
+class VerifyUser(BaseModel):
+    activation_code: str = Field(..., description="Код активации")
+    user_id: int = Field(..., description="Идентификатор")
+
+
+class UserMetric(BaseModel):
+    publication_count: int = Field(...)
+    user_id: int = Field(...)
+    authors_count: int = Field(...)
+    k1_count: int = Field(...)
+    k2_count: int = Field(...)
+    k3_count: int = Field(...)
+    rinc_count: int = Field(...)
+    message: str = Field(...)
+
+
+class DepartamentMetric(BaseModel):
+    publication_count: int = Field(...)
+    authors_count: int = Field(...)
+    k1_count: int = Field(...)
+    k2_count: int = Field(...)
+    k3_count: int = Field(...)
+    rinc_count: int = Field(...)
+    message: str = Field(...)

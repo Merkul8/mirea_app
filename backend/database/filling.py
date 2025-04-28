@@ -12,6 +12,7 @@ async def add_roles(session: AsyncSession) -> None:
         {"name": "boss"},
         {"name": "teacher"},
         {"name": "assistant"},
+        {"name": "student"},
     ]
 
     # Создаем и выполняем запрос

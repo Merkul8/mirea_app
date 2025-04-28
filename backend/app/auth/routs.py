@@ -1,23 +1,26 @@
 from pprint import pprint
 
 from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie, Query
+from sqlalchemy.sql.functions import user
 from starlette.responses import JSONResponse
 
 from app.auth.auth import get_password_hash, authenticate_user, create_access_token, create_refresh_token, \
     refresh_access_token
 from app.auth.dao import UserDAO, ActivateCodeDAO, RoleDAO, MetricsDAO
 from app.auth.dependencies import get_current_user
-from app.auth.models import User, UserRole
-from app.auth.shemas import UserRegister, UserLogin
+from app.auth.models import User, UserRole, Publication
+from app.auth.shemas import UserRegister, UserLogin, VerifyUser, UserMetric, DepartamentMetric
 from app.notification.sender import Sender
 from app.parsers.dao import ParserDAO
 from app.parsers.services import ElibraryParser
+from database.db import engine_session
 
 auth_router = APIRouter(tags=["Авторизация и аутентификация"])
 
 
 @auth_router.post("/register/")
 async def register_user(user_data: UserRegister) -> dict:
+    pprint(user_data)
     user = await UserDAO.find_one_or_none(email=user_data.email)
     if user:
         raise HTTPException(
@@ -33,12 +36,12 @@ async def register_user(user_data: UserRegister) -> dict:
 
 
 @auth_router.post("/activate_account/")
-async def activate_user(user_id, activation_code):
-    user = await UserDAO.find_one_or_none_by_id(user_id)
+async def activate_user(verify_data: VerifyUser) -> JSONResponse:
+    user = await UserDAO.find_one_or_none_by_id(verify_data.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден в системе.")
     code_instance = await ActivateCodeDAO.get_by_id_or_none(user.id)
-    if code_instance.code == activation_code:
+    if code_instance.code == verify_data.activation_code:
         await UserDAO.activate_user_email(user.id)
         content = {"message": f"Почта {user.email} пользователя с id {user.id} подтверждена."}
         return JSONResponse(content=content, status_code=200)
@@ -56,8 +59,22 @@ async def login_user(response: Response, user_data: UserLogin) -> dict:
     if check.is_active:
         access_token = create_access_token({"sub": str(check.id)})
         refresh_token = create_refresh_token({"sub": str(check.id)})
-        response.set_cookie(key="access_token", value=access_token, httponly=True)
-        response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,  # Для HTTPS
+            samesite='lax',  # Или 'none' если фронт и бек на разных доменах
+            domain='localhost'
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,  # Для HTTPS
+            samesite='lax',  # Или 'none' если фронт и бек на разных доменах
+            domain='localhost'
+        )
         return {'access_token': access_token, 'refresh_token': refresh_token}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -82,7 +99,18 @@ async def logout_user(response: Response) -> dict:
 
 @auth_router.get("/me/")
 async def get_me(user_data: User = Depends(get_current_user)):
-    return user_data
+    user_roles = await UserDAO.get_user_roles(user_id=user_data.id)
+    return {
+        "name": user_data.first_name,
+        "last_name": user_data.last_name,
+        "patronymic": user_data.patronymic,
+        "email": user_data.email,
+        "work_type": user_data.work_type,
+        "academic_degree": user_data.academic_degree,
+        "post": user_data.post,
+        "elibrary_id": user_data.elibrary_id,
+        "roles": user_roles
+    }
 
 
 @auth_router.patch("/add-role/")
@@ -137,7 +165,7 @@ async def department_users(user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(user.id)
     if "boss" in roles:
         users = await UserDAO.get_users_by_departament(dep_id=user.departament_id)
-        return users
+        return {"data": [user.to_json() for user in users]}
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
 
@@ -168,9 +196,36 @@ async def update_metrics(user_id: int, pub_count: int, current_user: User = Depe
 
 
 @auth_router.post("/metrics/create")
-async def create_metrics(user_id: int, publication_count: int, current_user: User = Depends(get_current_user)):
+async def create_metrics(metric_data: UserMetric, current_user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:
-        await MetricsDAO.create_metrics(user_id=user_id, pub_count=publication_count)
+        await MetricsDAO.create_metrics(metric_data.dict())
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.post("/metrics/departament/create")
+async def create_metrics(metric_data: DepartamentMetric, current_user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(current_user.id)
+    if "boss" in roles:
+        data = metric_data.dict()
+        data["departament_id"] = current_user.departament_id
+        await MetricsDAO.create_dep_metrics(data)
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.get("/user/publications/")
+async def user_publications(current_user: User = Depends(get_current_user)):
+    publications = await ParserDAO.get_user_publications(current_user.id)
+    return {
+        "data": [publication.to_dict() for publication in publications],
+    }
+
+
+@auth_router.get("/user/publications/read/{user_id}")
+async def user_publications(user_id: int, current_user: User = Depends(get_current_user)):
+    publications = await ParserDAO.get_user_publications(user_id)
+    return {
+        "data": [publication.to_dict() for publication in publications],
+    }

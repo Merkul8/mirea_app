@@ -2,6 +2,7 @@ from pprint import pprint
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from logger import logger
 from contextlib import asynccontextmanager
 
@@ -42,6 +43,14 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(router=auth_router)
 app.include_router(router=report_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Или конкретные домены
+    allow_methods=["*"],  # Разрешить все методы, включая OPTIONS
+    allow_headers=["*"],
+    allow_credentials=True,
+)
 
 if __name__ == "__main__":
     if config.MODE == "DEV":
