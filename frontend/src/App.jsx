@@ -6,6 +6,7 @@ import LoginPage from './Pages/LoginPage.jsx';
 import AccountPage from './Pages/AccountPage.jsx';
 import DepartamentUsersPage from "./Pages/DepartamentUsers.jsx";
 import DepUserRetrieve from "./Pages/DepUserRetrieve.jsx";
+import DepartamentMetricsPage from "./Pages/DepartamentMetricPage.jsx";
 
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/me" element={<AccountPage />} />
         <Route path="/users/departament" element={<DepartamentUsersPage />} />
+        <Route path="/departament/metrics" element={<DepartamentMetricsPage />} />
         <Route path="/users/departament/:user_id" element={<DepUserRetrieve />} />
         {/*<Route path="*" element={<PageNotFound />} />*/}
       </Routes>

@@ -56,3 +56,4 @@ class DepartamentMetric(BaseModel):
     k3_count: int = Field(...)
     rinc_count: int = Field(...)
     message: str = Field(...)
+    departament_id: int = Field(...)

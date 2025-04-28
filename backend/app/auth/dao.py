@@ -1,6 +1,7 @@
+from pprint import pprint
 from typing import Sequence
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from random import randint
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -154,9 +155,19 @@ class MetricsDAO:
 
     @classmethod
     @connection
+    async def delete_dep_metric_by_id(cls, metric_id: int, session: AsyncSession) -> None:
+        stmt = delete(DepartamentMetrics).where(DepartamentMetrics.id == metric_id)
+        await session.execute(stmt)
+        await session.commit()
+
+    @classmethod
+    @connection
     async def update_dep_metrics_by_user_id(cls, metric_data: dict, session: AsyncSession) -> None:
-        stmt = update(DepartamentMetrics).where(
-            DepartamentMetrics.departament_id == metric_data["departament_id"]).values(**metric_data)
+        try:
+            stmt = update(DepartamentMetrics).where(
+                DepartamentMetrics.departament_id == metric_data["departament_id"]).values(**metric_data)
+        except KeyError:
+            pprint(metric_data)
         await session.execute(stmt)
         await session.commit()
 

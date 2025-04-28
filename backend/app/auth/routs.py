@@ -109,6 +109,7 @@ async def get_me(user_data: User = Depends(get_current_user)):
         "academic_degree": user_data.academic_degree,
         "post": user_data.post,
         "elibrary_id": user_data.elibrary_id,
+        "departament_id": user_data.departament_id,
         "roles": user_roles
     }
 
@@ -199,6 +200,7 @@ async def update_metrics(metric_data: UserMetric, current_user: User = Depends(g
 
 @auth_router.put("/metrics/departament/update")
 async def update_dep_metrics(metric_data: DepartamentMetric, current_user: User = Depends(get_current_user)):
+    pprint(metric_data)
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:
         await MetricsDAO.update_dep_metrics_by_user_id(metric_data.dict())
@@ -222,6 +224,15 @@ async def create_metrics(metric_data: DepartamentMetric, current_user: User = De
         data = metric_data.dict()
         data["departament_id"] = current_user.departament_id
         await MetricsDAO.create_dep_metrics(data)
+    else:
+        return {"status_code": 403, "message": "Недостаточно прав."}
+
+
+@auth_router.delete("/metrics/departament/delete")
+async def delete_metric(metric_id: int, current_user: User = Depends(get_current_user)):
+    roles = await UserDAO.get_user_roles(current_user.id)
+    if "boss" in roles:
+        await MetricsDAO.delete_dep_metric_by_id(metric_id)
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
 

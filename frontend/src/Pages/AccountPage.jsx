@@ -105,23 +105,34 @@ export default function AccountPage() {
                     <span className="field-value">{userData.elibrary_id}</span>
                 </div>
             </div>
-
-            <div className="profile-section">
-                <button
-                    className="edit-btn"
-                    onClick={() => navigate('/profile/edit')}
-                >
-                    Редактировать профиль
-                </button>
-            </div>
-            <div className="profile-section">
-                {isBoss && (
+            <div className="row flex justify-content-center align-content-center align-items-center">
+                <div className="col-4">
                     <button
-                        className="boss-btn"
-                        onClick={() => navigate('/users/departament')}
+                        className="edit-btn"
+                        onClick={() => navigate('/profile/edit')}
                     >
-                        Управление отделом
+                        Редактировать профиль
                     </button>
+                </div>
+                <div className="col-4">
+                    {isBoss && (
+                        <button
+                            className="boss-btn"
+                            onClick={() => navigate('/users/departament')}
+                        >
+                            Управление отделом
+                        </button>
+                    )}
+                </div>
+                {isBoss && (
+                    <div className="col-4">
+                        <button
+                            className="boss-btn"
+                            onClick={() => navigate('/departament/metrics')}
+                        >
+                            Руководство метриками кафедры
+                        </button>
+                    </div>
                 )}
             </div>
 
