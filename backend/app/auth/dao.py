@@ -86,6 +86,13 @@ class UserDAO:
         result = await session.execute(query)
         return [instance.name for instance in result.scalars().all()]
 
+    @classmethod
+    @connection
+    async def update_user(cls, user_id: int, user_data: dict, session: AsyncSession) -> None:
+        stmt = update(User).where(User.id == user_id).values(**user_data)
+        await session.execute(stmt)
+        await session.commit()
+
 
 class ActivateCodeDAO:
 
@@ -157,6 +164,13 @@ class MetricsDAO:
     @connection
     async def delete_dep_metric_by_id(cls, metric_id: int, session: AsyncSession) -> None:
         stmt = delete(DepartamentMetrics).where(DepartamentMetrics.id == metric_id)
+        await session.execute(stmt)
+        await session.commit()
+
+    @classmethod
+    @connection
+    async def delete_metric_by_id(cls, metric_id: int, session: AsyncSession) -> None:
+        stmt = delete(EmployeeMetrics).where(EmployeeMetrics.id == metric_id)
         await session.execute(stmt)
         await session.commit()
 

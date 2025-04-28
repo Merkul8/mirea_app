@@ -13,8 +13,11 @@ export const backendUrls = {
   get_publication_by_user_id: (user_id) => buildUrl(baseBackend, `/user/publications/read/${user_id}/`),
   userMetric: (user_id) => buildUrl(baseBackend, `/metrics/${user_id}/`),
   update_user_metrics:  buildUrl(baseBackend, "/metrics/update"),
+  createUserMetric:  buildUrl(baseBackend, "/metrics/create"),
+  deleteUserMetric:  buildUrl(baseBackend, "/metrics/delete"),
   departamentMetric: (departament_id) => buildUrl(baseBackend, `/metrics/departament/${departament_id}/`),
   deleteDepMetric:  buildUrl(baseBackend, "/metrics/departament/delete"),
   createDepMetric:  buildUrl(baseBackend, "/metrics/departament/create"),
   updateDepMetric:  buildUrl(baseBackend, "/metrics/departament/update"),
+  updateUser:  buildUrl(baseBackend, "/users/update"),
 }

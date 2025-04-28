@@ -17,6 +17,16 @@ class UserRegister(BaseModel):
     departament_id: int = Field(..., description="ID кафедры")
 
 
+class UserData(BaseModel):
+    first_name: str = Field(..., min_length=3, max_length=50, description="Имя, от 3 до 50 символов")
+    last_name: str = Field(..., min_length=3, max_length=50, description="Фамилия, от 3 до 50 символов")
+    patronymic: str = Field(..., min_length=3, max_length=50, description="Отчество, от 3 до 50 символов")
+    elibrary_id: int = Field(..., description="ID пользователя в системе elibrary.")
+    work_type: str = Field(..., description="Тип трудоустройства")
+    post: str = Field(..., description="Должность")
+    academic_degree: str = Field(..., description="Ученая степень")
+
+
 class UserLogin(BaseModel):
     email: EmailStr = Field(..., description="Электронная почта")
     password: str = Field(..., min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков")
