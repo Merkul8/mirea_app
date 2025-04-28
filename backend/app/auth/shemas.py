@@ -38,6 +38,16 @@ class UserMetric(BaseModel):
     message: str = Field(...)
 
 
+class UserMetricUpdate(BaseModel):
+    publication_count: int = Field(...)
+    authors_count: int = Field(...)
+    k1_count: int = Field(...)
+    k2_count: int = Field(...)
+    k3_count: int = Field(...)
+    rinc_count: int = Field(...)
+    message: str = Field(...)
+
+
 class DepartamentMetric(BaseModel):
     publication_count: int = Field(...)
     authors_count: int = Field(...)

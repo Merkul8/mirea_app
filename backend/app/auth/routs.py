@@ -9,7 +9,7 @@ from app.auth.auth import get_password_hash, authenticate_user, create_access_to
 from app.auth.dao import UserDAO, ActivateCodeDAO, RoleDAO, MetricsDAO
 from app.auth.dependencies import get_current_user
 from app.auth.models import User, UserRole, Publication
-from app.auth.shemas import UserRegister, UserLogin, VerifyUser, UserMetric, DepartamentMetric
+from app.auth.shemas import UserRegister, UserLogin, VerifyUser, UserMetric, DepartamentMetric, UserMetricUpdate
 from app.notification.sender import Sender
 from app.parsers.dao import ParserDAO
 from app.parsers.services import ElibraryParser
@@ -178,19 +178,30 @@ async def department_users(user: User = Depends(get_current_user)):
 
 @auth_router.get("/metrics/{user_id}")
 async def get_metrics(user_id: int, current_user: User = Depends(get_current_user)):
+    metric = await MetricsDAO.get_metrics_by_user_id(user_id=user_id)
+    return metric
+
+
+@auth_router.get("/metrics/departament/{departament_id}")
+async def get_dep_metrics(departament_id: int, current_user: User = Depends(get_current_user)):
+    metric = await MetricsDAO.get_dep_metrics_by_departament_id(departament_id=departament_id)
+    return metric
+
+
+@auth_router.put("/metrics/update/{user_id}")
+async def update_metrics(metric_data: UserMetric, current_user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:
-        metric = await MetricsDAO.get_metrics_by_user_id(user_id=user_id)
-        return metric
+        await MetricsDAO.update_metrics_by_user_id(metric_data.dict())
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
 
 
-@auth_router.patch("/metrics/update/{user_id}")
-async def update_metrics(user_id: int, pub_count: int, current_user: User = Depends(get_current_user)):
+@auth_router.put("/metrics/departament/update/{user_id}")
+async def update_dep_metrics(metric_data: DepartamentMetric, current_user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(current_user.id)
     if "boss" in roles:
-        await MetricsDAO.update_metrics_by_user_id(user_id=user_id, pub_count=pub_count)
+        await MetricsDAO.update_dep_metrics_by_user_id(metric_data.dict())
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
 
@@ -224,7 +235,7 @@ async def user_publications(current_user: User = Depends(get_current_user)):
 
 
 @auth_router.get("/user/publications/read/{user_id}")
-async def user_publications(user_id: int, current_user: User = Depends(get_current_user)):
+async def user_publications_read(user_id: int, current_user: User = Depends(get_current_user)):
     publications = await ParserDAO.get_user_publications(user_id)
     return {
         "data": [publication.to_dict() for publication in publications],

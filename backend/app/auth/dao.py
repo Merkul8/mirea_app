@@ -140,8 +140,23 @@ class MetricsDAO:
 
     @classmethod
     @connection
-    async def update_metrics_by_user_id(cls, user_id: int, pub_count: int, session: AsyncSession) -> None:
-        stmt = update(EmployeeMetrics).where(EmployeeMetrics.user_id == user_id).values(publication_count=pub_count)
+    async def get_dep_metrics_by_departament_id(cls, departament_id: int, session: AsyncSession) -> DepartamentMetrics:
+        query = select(DepartamentMetrics).where(DepartamentMetrics.departament_id == departament_id)
+        result = await session.execute(query)
+        return result.scalars().first()
+
+    @classmethod
+    @connection
+    async def update_metrics_by_user_id(cls, metric_data: dict, session: AsyncSession) -> None:
+        stmt = update(EmployeeMetrics).where(EmployeeMetrics.user_id == metric_data["user_id"]).values(**metric_data)
+        await session.execute(stmt)
+        await session.commit()
+
+    @classmethod
+    @connection
+    async def update_dep_metrics_by_user_id(cls, metric_data: dict, session: AsyncSession) -> None:
+        stmt = update(DepartamentMetrics).where(
+            DepartamentMetrics.departament_id == metric_data["departament_id"]).values(**metric_data)
         await session.execute(stmt)
         await session.commit()
 

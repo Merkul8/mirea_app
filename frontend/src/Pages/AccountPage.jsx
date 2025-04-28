@@ -48,6 +48,7 @@ export default function AccountPage() {
                 setPublications(pubData.data || []);
             } catch (err) {
                 setError(err.message);
+                navigate("/login")
             } finally {
                 setLoading(false);
                 setPubLoading(false);
@@ -105,21 +106,25 @@ export default function AccountPage() {
                 </div>
             </div>
 
-            <button
-                className="edit-btn"
-                onClick={() => navigate('/profile/edit')}
-            >
-                Редактировать профиль
-            </button>
-
-            {isBoss && (
+            <div className="profile-section">
                 <button
-                    className="boss-btn"
-                    onClick={() => navigate('/users/departament')}
+                    className="edit-btn"
+                    onClick={() => navigate('/profile/edit')}
                 >
-                    Управление отделом
+                    Редактировать профиль
                 </button>
-            )}
+            </div>
+            <div className="profile-section">
+                {isBoss && (
+                    <button
+                        className="boss-btn"
+                        onClick={() => navigate('/users/departament')}
+                    >
+                        Управление отделом
+                    </button>
+                )}
+            </div>
+
 
             <div className="profile-section">
                 <h3>Публикации</h3>

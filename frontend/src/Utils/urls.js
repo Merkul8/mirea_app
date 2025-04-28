@@ -11,4 +11,6 @@ export const backendUrls = {
   userPublications: buildUrl(baseBackend, "/user/publications/"),
   usersDepartament: buildUrl(baseBackend, "/department-users/"),
   get_publication_by_user_id: (user_id) => buildUrl(baseBackend, `/user/publications/read/${user_id}/`),
+  userMetric: (user_id) => buildUrl(baseBackend, `/metrics/${user_id}/`),
+  departamentMetric: (departament_id) => buildUrl(baseBackend, `/metrics/departament/${departament_id}/`),
 }

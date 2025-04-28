@@ -83,6 +83,7 @@ class User(Base):
             "work_type": self.work_type,
             "post": self.post,
             "academic_degree": self.academic_degree,
+            "departament_id": self.departament_id,
         }
 
 class Departament(Base):
