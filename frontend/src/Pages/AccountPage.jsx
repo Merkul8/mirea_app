@@ -1,6 +1,6 @@
-import { backendUrls } from "../Utils/urls.js";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {backendUrls} from "../Utils/urls.js";
+import {useState, useEffect} from "react";
+import {useNavigate} from "react-router-dom";
 import Modal from 'react-modal';
 import '../Components/Auth/Account/Account.css';
 
@@ -76,8 +76,8 @@ export default function AccountPage() {
     };
 
     const handleEditChange = (e) => {
-        const { name, value } = e.target;
-        setEditFormData(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setEditFormData(prev => ({...prev, [name]: value}));
     };
 
     const handleEditSubmit = async (e) => {
@@ -106,6 +106,17 @@ export default function AccountPage() {
             alert('Не удалось обновить публикацию.');
         }
     };
+    const handleLogout = async () => {
+        try {
+            await fetch(backendUrls.logout, {
+                method: "POST",
+                credentials: "include",
+            });
+            navigate("/login");
+        } catch (err) {
+            alert("Ошибка при выходе из системы");
+        }
+    };
 
     if (loading) {
         return <div className="loading">Загрузка профиля...</div>;
@@ -124,6 +135,9 @@ export default function AccountPage() {
                 <div className="buttons-grid">
                     <button className="edit-btn" onClick={() => navigate('/profile/edit')}>
                         Редактировать профиль
+                    </button>
+                    <button onClick={handleLogout} className="logout-button">
+                        🚪 Выйти
                     </button>
                     {isBoss && (
                         <>

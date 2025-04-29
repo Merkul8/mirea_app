@@ -40,7 +40,13 @@ const LoginForm = () => {
 
             const data = await response.json();
             console.log('Успешная авторизация:', data);
-            navigate('/me'); // Перенаправление после успеха
+
+            if (data.user?.is_admin) {
+                navigate('/admin'); // Если суперадмин — на админку
+            } else {
+                navigate('/me'); // Иначе — на профиль
+            }
+
         } catch (err) {
             console.error('Ошибка авторизации:', err);
             setError(err.message || 'Произошла ошибка при авторизации');

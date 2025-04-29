@@ -6,6 +6,7 @@ export const backendUrls = {
   base: baseBackend,
   register: buildUrl(baseBackend, "/register/"),
   login: buildUrl(baseBackend, "/login/"),
+  logout: buildUrl(baseBackend, "/logout/"),
   varify: buildUrl(baseBackend, "/activate_account/"),
   me: buildUrl(baseBackend, "/me/"),
   userPublications: buildUrl(baseBackend, "/user/publications/"),
@@ -21,4 +22,6 @@ export const backendUrls = {
   updateDepMetric:  buildUrl(baseBackend, "/metrics/departament/update"),
   updateUser:  buildUrl(baseBackend, "/users/update"),
   updatePublication:  buildUrl(baseBackend, "/user/publications/update"),
+  usersToActivate:  buildUrl(baseBackend, "/users_to_activate/"),
+  activateUser: (userId) => buildUrl(baseBackend, `/activate_user/${userId}`),
 }

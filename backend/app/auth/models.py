@@ -63,6 +63,7 @@ class User(Base):
 
     roles: Mapped[List["Role"]] = relationship(secondary="user_role", back_populates="users")
     publications: Mapped[List["Publication"]] = relationship(secondary="user_publication", back_populates="users")
+    departament = relationship("Departament", back_populates="users")
 
     def __repr__(self):
         return f"User(id={self.id})"
@@ -84,6 +85,22 @@ class User(Base):
             "post": self.post,
             "academic_degree": self.academic_degree,
             "departament_id": self.departament_id,
+            "is_admin": self.is_superuser,
+            "departament": self.departament.title if self.departament else None,
+        }
+
+    def to_json_login(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "patronymic": self.patronymic,
+            "email": self.email,
+            "work_type": self.work_type,
+            "post": self.post,
+            "academic_degree": self.academic_degree,
+            "departament_id": self.departament_id,
+            "is_admin": self.is_superuser,
         }
 
 class Departament(Base):
@@ -94,6 +111,8 @@ class Departament(Base):
     title: Mapped[str] = Column(String)
     institute_id = Column(Integer, ForeignKey("institute.id"))
     institute: Mapped["Institute"] = relationship(back_populates="departments")
+
+    users = relationship("User", back_populates="departament")
 
     def __repr__(self):
         return f"Departament(id={self.id})"

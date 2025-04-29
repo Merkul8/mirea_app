@@ -8,6 +8,7 @@ import DepartamentUsersPage from "./Pages/DepartamentUsers.jsx";
 import DepUserRetrieve from "./Pages/DepUserRetrieve.jsx";
 import DepartamentMetricsPage from "./Pages/DepartamentMetricPage.jsx";
 import ProfileEditPage from "./Pages/ProfileEditPage.jsx";
+import AdminPage from "./Pages/AdminPage.jsx";
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/me" element={<AccountPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/users/departament" element={<DepartamentUsersPage />} />
         <Route path="/departament/metrics" element={<DepartamentMetricsPage />} />
         <Route path="/users/departament/:user_id" element={<DepUserRetrieve />} />

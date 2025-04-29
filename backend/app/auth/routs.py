@@ -76,7 +76,7 @@ async def login_user(response: Response, user_data: UserLogin) -> dict:
             samesite='lax',  # Или 'none' если фронт и бек на разных доменах
             domain='localhost'
         )
-        return {'access_token': access_token, 'refresh_token': refresh_token}
+        return {'access_token': access_token, 'refresh_token': refresh_token, "user": check.to_json_login()}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Аккаунт ещё не активирован, ждите подтверждения администратором.")
@@ -98,7 +98,8 @@ async def edit_user(user_data: UserData, current_user: User = Depends(get_curren
 
 @auth_router.post("/logout/")
 async def logout_user(response: Response) -> dict:
-    response.delete_cookie(key="users_access_token")
+    response.delete_cookie(key="access_token")
+    response.delete_cookie(key="refresh_token")
     return {"message": "Logout done."}
 
 
@@ -152,14 +153,15 @@ async def users_to_activate(user_data: User = Depends(get_current_user)):
         return {"status_code": 403, "message": "Недостаточно прав."}
 
 
-@auth_router.post("/activate_user/")
+@auth_router.patch("/activate_user/{user_id}")
 async def activate_user(user_id: int, user_data: User = Depends(get_current_user)):
     if user_data.is_superuser:
         await UserDAO.activate_user_by_id(user_id=user_id)
-        author_data = ElibraryParser(user_data.elibrary_id)
+        curr_user = await UserDAO.find_one_or_none_by_id(user_id)
+        author_data = ElibraryParser(curr_user.elibrary_id)
         data = author_data.elibrary_data()
         pprint(data)
-        await ParserDAO.create_publications(data, user_data)
+        await ParserDAO.create_publications(data, curr_user)
         # send_message to user_id
         return {"status_code": 200, "message": f"Пользователь с id {user_id} активирован."}
     else:

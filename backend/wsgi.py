@@ -19,7 +19,6 @@ from database.filling import add_roles, add_departments
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     # await services_categories_to_db()
     # await add_roles()
     # await add_departments()
@@ -46,10 +45,10 @@ app.include_router(router=report_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Или конкретные домены
-    allow_methods=["*"],  # Разрешить все методы, включая OPTIONS
-    allow_headers=["*"],
-    allow_credentials=True,
+    allow_origins=["http://localhost:5173"],  # Указываем домен клиента
+    allow_credentials=True,  # Разрешаем отправку cookies
+    allow_methods=["*"],  # Разрешаем все методы
+    allow_headers=["*"],  # Разрешаем все заголовки
 )
 
 if __name__ == "__main__":
@@ -60,4 +59,3 @@ if __name__ == "__main__":
         raise ValueError("Хост/Порт не определен")
 
     uvicorn.run(app, host=app_host, port=app_port, log_level="info")
-

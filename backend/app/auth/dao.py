@@ -4,6 +4,7 @@ from typing import Sequence
 from sqlalchemy import select, update, delete
 from random import randint
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from database.db import connection
 from app.auth.models import User, Role, UserRole, ActivateCode, Departament, EmployeeMetrics, DepartamentMetrics
@@ -49,8 +50,7 @@ class UserDAO:
     async def not_activated_users(cls, session: AsyncSession) -> Sequence[User]:
         query = select(User).where(
             User.is_active == False,
-            User.is_active_email == True
-        )
+        ).options(selectinload(User.departament))
         result = await session.execute(query)
         return result.scalars().all()
 
@@ -182,6 +182,7 @@ class MetricsDAO:
                 DepartamentMetrics.departament_id == metric_data["departament_id"]).values(**metric_data)
         except KeyError:
             pprint(metric_data)
+            raise KeyError("Departament id not found")
         await session.execute(stmt)
         await session.commit()
 
