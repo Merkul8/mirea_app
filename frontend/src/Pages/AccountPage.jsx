@@ -137,7 +137,7 @@ export default function AccountPage() {
                         Редактировать профиль
                     </button>
                     <button onClick={handleLogout} className="logout-button">
-                        🚪 Выйти
+                        Выйти
                     </button>
                     {isBoss && (
                         <>

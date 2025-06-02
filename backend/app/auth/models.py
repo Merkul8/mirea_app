@@ -22,6 +22,9 @@ class EmployeeMetrics(Base):
     rinc_count: Mapped[int] = Column(Integer)
     message: Mapped[str] = Column(String)
 
+    def __repr__(self):
+        return f"EmployeeMetrics(user_id={self.user_id})"
+
 
 class Role(Base):
     __tablename__ = "role"
@@ -130,6 +133,9 @@ class DepartamentMetrics(Base):
     k3_count: Mapped[int] = Column(Integer)
     rinc_count: Mapped[int] = Column(Integer)
     message: Mapped[str] = Column(String)
+
+    def __repr__(self):
+        return f"DepartamentMetrics(departament_id={self.departament_id})"
 
 class Institute(Base):
 

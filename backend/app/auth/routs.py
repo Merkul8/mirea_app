@@ -173,15 +173,9 @@ async def department_users(user: User = Depends(get_current_user)):
     roles = await UserDAO.get_user_roles(user.id)
     if "boss" in roles:
         users = await UserDAO.get_users_by_departament(dep_id=user.departament_id)
-        return {"data": [user.to_json() for user in users]}
+        return {"data": [user.to_json_login() for user in users]}
     else:
         return {"status_code": 403, "message": "Недостаточно прав."}
-
-
-# @auth_router.get("/users/{user_id}")
-# async def get_users(user_id: int, current_user: User = Depends(get_current_user)):
-#     user = await UserDAO.find_one_or_none_by_id(user_id)
-#     return user
 
 
 @auth_router.get("/metrics/{user_id}")
